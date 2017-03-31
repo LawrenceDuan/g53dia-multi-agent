@@ -54,6 +54,8 @@ public class CommandCenter {
     		seenTasks.add(taskDetail);
 //    		System.out.println("-> size: " + seenTasks.size());
         }
+    	
+//    	resortSeenTasks();
     }
     
     private int isInList(ArrayList<int[]> seenList,int[] taskDetail){
@@ -66,4 +68,10 @@ public class CommandCenter {
         }
         return -1;
     }
+    
+//    private void resortSeenTasks(){
+//    	for(int i = 0;i < seenTasks.size();i++){
+//    		
+//    	}
+//    }
 }
