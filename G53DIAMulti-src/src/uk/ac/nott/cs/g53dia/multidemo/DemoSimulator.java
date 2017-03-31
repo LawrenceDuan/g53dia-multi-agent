@@ -1,4 +1,6 @@
 package uk.ac.nott.cs.g53dia.multidemo;
+import java.util.Random;
+
 import uk.ac.nott.cs.g53dia.multilibrary.*;
 
 /**
@@ -29,20 +31,24 @@ public class DemoSimulator {
 	/** 
 	 * Number of tankers in the fleet
 	 */
-	private static int FLEET_SIZE = 3;
+	private static int FLEET_SIZE = 2;
 	
 	/**
 	 * Number of timesteps to execute
 	 */
 	private static int DURATION = 10000;
 	
+	public static CommandCenter commandCenter = new CommandCenter();
+	public static int tankerNumberCount = 0;
+	
 	public static void main(String[] args) {
         // Create an environment
-        Environment env = new Environment(Tanker.MAX_FUEL/2);
+        Environment env = new Environment(Tanker.MAX_FUEL/2, new Random(2));
         //Create a fleet
         Fleet fleet = new Fleet();
         // Create the tankers
         for (int i=0; i<FLEET_SIZE; i++) {
+        	tankerNumberCount++;
         	fleet.add(new DemoTanker());
         }
         // Create a GUI window to show our tanker
@@ -50,6 +56,7 @@ public class DemoSimulator {
         tv.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         // Start executing the Tanker
         while (env.getTimestep() < DURATION) {
+        	System.out.println(commandCenter.seenTasks.size());
             // Advance the environment timestep
             env.tick();
             // Update the GUI
@@ -70,6 +77,7 @@ public class DemoSimulator {
             		System.err.println("Failed: " + afe.getMessage());
             	}
             }
+            System.out.println();
             try { Thread.sleep(DELAY);} catch (Exception e) { }
         }
     }
