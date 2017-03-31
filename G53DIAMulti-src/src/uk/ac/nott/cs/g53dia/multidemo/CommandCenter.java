@@ -1,18 +1,20 @@
 package uk.ac.nott.cs.g53dia.multidemo;
-import uk.ac.nott.cs.g53dia.multilibrary.*;
 import java.util.*;
-import java.nio.file.Files;
 
 public class CommandCenter {
 
 	private int caseCount = 0;
-	
+	// Observed tasks' list shared by all tankers
 	public ArrayList<int[]> seenTasks = new ArrayList<int[]>();
 
     public CommandCenter(){
 
     }
 
+    /**
+     * When a new DemoTanker is created, it will contact this method and request for a initial viewing path 
+     * @return initial viewing path
+     */
     public ArrayList<int[]> initialWalkingAroundPoints(){
     	ArrayList<int[]> initialWalkingAroundPoints = new ArrayList<int[]>();
 		switch (caseCount) {
@@ -48,30 +50,28 @@ public class CommandCenter {
         return initialWalkingAroundPoints;
     }
     
+    /**
+     * Storing new observed into seenTasks
+     * @param taskDetail
+     */
     public void storeTasks(int[] taskDetail){
     	if (isInList(seenTasks, taskDetail) == -1){
-//    		System.out.print("size: " + seenTasks.size() + "add:(" + taskDetail[0] + "," + taskDetail[1] + ") ");
     		seenTasks.add(taskDetail);
-//    		System.out.println("-> size: " + seenTasks.size());
         }
-    	
-//    	resortSeenTasks();
     }
     
+    /**
+     * Check if the new observed task has been stored in the seenTasks
+     * @param seenList
+     * @param taskDetail
+     * @return -1 indicates the new observed task is not in the seenTasks, otherwise the task exists in the seenTasks
+     */
     private int isInList(ArrayList<int[]> seenList,int[] taskDetail){
     	for (int i = 0; i < seenList.size(); i++){
-//    		System.out.println(seenList.get(i).toString() +"/"+taskDetail.toString());
             if (seenList.get(i)[0] == taskDetail[0] && seenList.get(i)[1] == taskDetail[1]){
-//            	System.out.println("Already in list");
                 return i;
             }
         }
         return -1;
     }
-    
-//    private void resortSeenTasks(){
-//    	for(int i = 0;i < seenTasks.size();i++){
-//    		
-//    	}
-//    }
 }

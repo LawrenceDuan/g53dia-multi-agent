@@ -1,24 +1,6 @@
 package uk.ac.nott.cs.g53dia.multidemo;
 import java.util.Random;
-
 import uk.ac.nott.cs.g53dia.multilibrary.*;
-
-/**
- * An example of how to simulate execution of a tanker agent in the sample (task) environment.
- * <p>
- * Creates a default {@link Environment}, a {@link DemoTanker} and a GUI window 
- * (a {@link TankerViewer}) and executes the Tanker for DURATION days in the environment. 
- * 
- * @author Julian Zappala
- */
-
-/*
- * Copyright (c) 2005 Neil Madden.
- * Copyright (c) 2011 Julian Zappala (jxz@cs.nott.ac.uk)
- * 
- * See the file "license.terms" for information on usage and redistribution
- * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
- */
 
 public class DemoSimulator {
 
@@ -38,7 +20,13 @@ public class DemoSimulator {
 	 */
 	private static int DURATION = 10000;
 	
+	/**
+	 * Initialise a command centre at the start of the programme
+	 */
 	public static CommandCenter commandCenter = new CommandCenter();
+	/**
+	 * Counts the number of tankers created
+	 */
 	public static int tankerNumberCount = 0;
 	
 	public static void main(String[] args) {
@@ -56,7 +44,6 @@ public class DemoSimulator {
         tv.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         // Start executing the Tanker
         while (env.getTimestep() < DURATION) {
-        	System.out.println(commandCenter.seenTasks.size());
             // Advance the environment timestep
             env.tick();
             // Update the GUI
@@ -77,7 +64,7 @@ public class DemoSimulator {
             		System.err.println("Failed: " + afe.getMessage());
             	}
             }
-            System.out.println();
+            System.out.println("===="+env.getTimestep()+"====");
             try { Thread.sleep(DELAY);} catch (Exception e) { }
         }
     }
