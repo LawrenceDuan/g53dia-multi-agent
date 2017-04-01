@@ -9,6 +9,8 @@ public class DemoTanker extends Tanker {
 	 * Each tanker has one specific number during each run
 	 */
 	private int tankerCount;
+	
+	private CommandCenter commandCenter = DemoSimulator.commandCenter;
 
     private ArrayList<int[]> initialWlakingAroundPoints = new ArrayList<int[]>();
     private boolean isInitialWlakingAround = true;
@@ -20,7 +22,7 @@ public class DemoTanker extends Tanker {
      */
     private ArrayList<int[]> seenWells = new ArrayList<int[]>();
     private ArrayList<int[]> seenStations = new ArrayList<int[]>();
-    private ArrayList<int[]> seenTasks = DemoSimulator.commandCenter.seenTasks;
+    private ArrayList<int[]> seenTasks = commandCenter.seenTasks;
     private ArrayList<int[]> seenFuelpumps = new ArrayList<int[]>();
 
     /**
@@ -52,7 +54,7 @@ public class DemoTanker extends Tanker {
 
         if(isInitialWlakingAround){
         	if(needWalkingAroundPoints){
-            	initialWlakingAroundPoints = DemoSimulator.commandCenter.initialWalkingAroundPoints();
+            	initialWlakingAroundPoints = commandCenter.initialWalkingAroundPoints();
             	needWalkingAroundPoints = false;
         	}
         	System.out.println("Tanker "+tankerCount+" (#) "+"Tanker is walking around to search for new tasks");
@@ -82,7 +84,7 @@ public class DemoTanker extends Tanker {
                         Station focusedSta = (Station) view[i][j];
                         if (focusedSta.getTask() != null){
                             int[] taskDetails = new int[]{focusedPos[0], focusedPos[1], focusedSta.getTask().getWasteAmount(), 0};
-                            DemoSimulator.commandCenter.storeTasks(taskDetails);
+                            commandCenter.storeTasks(taskDetails);
                         }
                     } else if (view[i][j] instanceof Well && isInList(seenWells, focusedPos) == -1) {
                         seenWells.add(focusedPos);
@@ -136,13 +138,13 @@ public class DemoTanker extends Tanker {
         // taskAmount >= 1
         if(seenTasks.size() >= 1){
             // Find nearest task going from current tank position
-            int taskChosenIndex = getClosestNonallocatedTaskIndex(seenTasks, new int[]{tankPosX, tankPosY});
+            int taskChosenIndex = commandCenter.getClosestNonallocatedTaskIndex(seenTasks, new int[]{tankPosX, tankPosY}, tankerCount);
 
             // -1 means there is no task that can be reached from current tanker position even with full fulelevel
             if(taskChosenIndex == -1){
                 int[] root = {0,0};
                 // Find nearest fuelPump going from current tank position
-                int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
+                int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
                 int distanceBetweenRootAndCurrent = Math.max(Math.abs(root[0] - tankPosX),Math.abs(root[1] - tankPosY));
 
                 if(getFuelLevel() > distanceBetweenRootAndCurrent){
@@ -158,17 +160,17 @@ public class DemoTanker extends Tanker {
             int taskToGoX = taskToGo[0];
             int taskToGoY = taskToGo[1];
             // Find nearest fuelPump going from taskToGo
-            int[] nearestFuelpumpGoingFromTask = seenFuelpumps.get(getClosestIndexBetween(seenFuelpumps, taskToGo));
+            int[] nearestFuelpumpGoingFromTask = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, taskToGo));
             // Find nearest fuelPump going from current tank position
-            int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
+            int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
             // Find nearest well going from taskToGo
-            int[] nearestWellGoingFromTask = seenWells.get(getClosestIndexBetween(seenWells, taskToGo));
+            int[] nearestWellGoingFromTask = seenWells.get(commandCenter.getClosestIndexBetween(seenWells, taskToGo));
             // Find nearest fuelPump going from well
-            int[] nearestFuelpumpGoingFromWell = seenFuelpumps.get(getClosestIndexBetween(seenFuelpumps, nearestWellGoingFromTask));
+            int[] nearestFuelpumpGoingFromWell = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, nearestWellGoingFromTask));
             // Find nearest well going from tank
-            int[] nearestWellGoingFromTank = seenWells.get(getClosestIndexBetween(seenWells, new int[]{tankPosX, tankPosY}));
+            int[] nearestWellGoingFromTank = seenWells.get(commandCenter.getClosestIndexBetween(seenWells, new int[]{tankPosX, tankPosY}));
             // Find nearest fuelPump going from well
-            int[] nearestFuelpumpGoingFromWell2 = seenFuelpumps.get(getClosestIndexBetween(seenFuelpumps, nearestWellGoingFromTank));
+            int[] nearestFuelpumpGoingFromWell2 = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, nearestWellGoingFromTank));
             int distanceBetweenTankAndTask = Math.max(Math.abs(taskToGo[0] - tankPosX),Math.abs(taskToGo[1] - tankPosY));
             int distanceBetweenTaskAndFuelPump = Math.max(Math.abs(taskToGo[0] - nearestFuelpumpGoingFromTask[0]),Math.abs(taskToGo[1] - nearestFuelpumpGoingFromTask[1]));
             int fuelleftAfterTask = getFuelLevel() - distanceBetweenTankAndTask;
@@ -281,7 +283,7 @@ public class DemoTanker extends Tanker {
         else {
             int[] root = {0,0};
             // Find nearest fuelPump going from current tank position
-            int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
+            int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
             int distanceBetweenRootAndCurrent = Math.max(Math.abs(root[0] - tankPosX),Math.abs(root[1] - tankPosY));
 
             if(getFuelLevel() > distanceBetweenRootAndCurrent){
@@ -415,68 +417,6 @@ public class DemoTanker extends Tanker {
                 tankPosY--;
                 break;
         }
-    }
-
-    /**
-     * Find a closest int[]'s index in the ArrayList from a given int[] point
-     * @param   indicesList
-     * @param   point
-     * @return  the index of ArrayList
-     */
-    private int getClosestIndexBetween(ArrayList<int[]> indicesList, int[] point){
-        int furthestGoableDistance = 100;
-        int closestIndex = -1;
-        for(int i = 0;i < indicesList.size();i++){
-            int[] positionGoable = indicesList.get(i);
-        	int distanceBetween = Math.max(Math.abs(positionGoable[0] - point[0]),Math.abs(positionGoable[1] - point[1]));
-            if(distanceBetween <= furthestGoableDistance){
-                furthestGoableDistance = distanceBetween;
-                closestIndex = i;
-            }
-        }
-        return closestIndex;
-    }
-
-    /**
-     * Specially used to search through seenTasks
-     * @param indicesList
-     * @param point
-     * @return Nearest go-able task's index or previously chosen task's index
-     */
-    private int getClosestNonallocatedTaskIndex(ArrayList<int[]> indicesList, int[] point){
-        int furthestGoableDistance = 100;
-    	int lowestNumberOfWaste = 0;
-        int closestIndex = -1;
-
-        // If the tanker has chosen a task before, return the task's index
-        for(int i = 0;i < indicesList.size();i++){
-        	int[] positionGoable = indicesList.get(i);
-        	if(positionGoable[3] == tankerCount){
-        		return i;
-        	}
-        }
-
-        // If the tanker has not chosen a task, search through seenTasks to get and return the Nearest go-able task's index
-        for(int i = 0;i < indicesList.size();i++){
-            int[] positionGoable = indicesList.get(i);
-        	if(positionGoable[3] == 0){
-            	int distanceBetween = Math.max(Math.abs(positionGoable[0] - point[0]),Math.abs(positionGoable[1] - point[1]));
-                int numberOfWaste = positionGoable[2];
-//            	if(distanceBetween <= furthestGoableDistance){
-//                    furthestGoableDistance = distanceBetween;
-//                    closestIndex = i;
-//                }
-                if(distanceBetween <= furthestGoableDistance && numberOfWaste >= lowestNumberOfWaste){
-                    furthestGoableDistance = distanceBetween;
-                    lowestNumberOfWaste = numberOfWaste;
-                    closestIndex = i;
-                }
-            }
-        }
-        if(closestIndex != -1){
-        	seenTasks.set(closestIndex, new int[]{seenTasks.get(closestIndex)[0],seenTasks.get(closestIndex)[1],seenTasks.get(closestIndex)[2],tankerCount});
-        }
-        return closestIndex;
     }
 
     /**

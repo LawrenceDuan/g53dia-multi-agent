@@ -74,4 +74,66 @@ public class CommandCenter {
         }
         return -1;
     }
+    
+    /**
+     * Specially used to search through seenTasks
+     * @param indicesList
+     * @param point
+     * @return Nearest go-able task's index or previously chosen task's index
+     */
+    public int getClosestNonallocatedTaskIndex(ArrayList<int[]> indicesList, int[] point, int tankerCount){
+        int furthestGoableDistance = 100;
+    	int lowestNumberOfWaste = 0;
+        int closestIndex = -1;
+
+        // If the tanker has chosen a task before, return the task's index
+        for(int i = 0;i < indicesList.size();i++){
+        	int[] positionGoable = indicesList.get(i);
+        	if(positionGoable[3] == tankerCount){
+        		return i;
+        	}
+        }
+
+        // If the tanker has not chosen a task, search through seenTasks to get and return the Nearest go-able task's index
+        for(int i = 0;i < indicesList.size();i++){
+            int[] positionGoable = indicesList.get(i);
+        	if(positionGoable[3] == 0){
+            	int distanceBetween = Math.max(Math.abs(positionGoable[0] - point[0]),Math.abs(positionGoable[1] - point[1]));
+                int numberOfWaste = positionGoable[2];
+//            	if(distanceBetween <= furthestGoableDistance){
+//                    furthestGoableDistance = distanceBetween;
+//                    closestIndex = i;
+//                }
+                if(distanceBetween <= furthestGoableDistance && numberOfWaste >= lowestNumberOfWaste){
+                    furthestGoableDistance = distanceBetween;
+                    lowestNumberOfWaste = numberOfWaste;
+                    closestIndex = i;
+                }
+            }
+        }
+        if(closestIndex != -1){
+        	seenTasks.set(closestIndex, new int[]{seenTasks.get(closestIndex)[0],seenTasks.get(closestIndex)[1],seenTasks.get(closestIndex)[2],tankerCount});
+        }
+        return closestIndex;
+    }
+    
+    /**
+     * Find a closest int[]'s index in the ArrayList from a given int[] point
+     * @param   indicesList
+     * @param   point
+     * @return  the index of ArrayList
+     */
+    public int getClosestIndexBetween(ArrayList<int[]> indicesList, int[] point){
+        int furthestGoableDistance = 100;
+        int closestIndex = -1;
+        for(int i = 0;i < indicesList.size();i++){
+            int[] positionGoable = indicesList.get(i);
+        	int distanceBetween = Math.max(Math.abs(positionGoable[0] - point[0]),Math.abs(positionGoable[1] - point[1]));
+            if(distanceBetween <= furthestGoableDistance){
+                furthestGoableDistance = distanceBetween;
+                closestIndex = i;
+            }
+        }
+        return closestIndex;
+    }
 }
