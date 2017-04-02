@@ -10,6 +10,9 @@ public class DemoTanker extends Tanker {
 	 */
 	private int tankerCount;
 	
+	/**
+	 * Get the command centre
+	 */
 	private CommandCenter commandCenter = DemoSimulator.commandCenter;
 
     private ArrayList<int[]> initialWlakingAroundPoints = new ArrayList<int[]>();
