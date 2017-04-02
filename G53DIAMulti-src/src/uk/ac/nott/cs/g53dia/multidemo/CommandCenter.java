@@ -116,7 +116,7 @@ public class CommandCenter {
             }
         }
         if(closestIndex != -1){
-        	seenTasks.set(closestIndex, new int[]{seenTasks.get(closestIndex)[0],seenTasks.get(closestIndex)[1],seenTasks.get(closestIndex)[2],tankerCount});
+        	taskLocked(closestIndex, tankerCount);
         }
         return closestIndex;
     }
@@ -139,5 +139,31 @@ public class CommandCenter {
             }
         }
         return closestIndex;
+    }
+    
+    /**
+     * Locking the task which is chosen by a tanker
+     * @param closestIndex
+     * @param tankerCount
+     */
+    public void taskLocked(int closestIndex, int tankerCount){
+    	seenTasks.set(closestIndex, new int[]{seenTasks.get(closestIndex)[0],seenTasks.get(closestIndex)[1],seenTasks.get(closestIndex)[2],tankerCount});
+    }
+    
+    /**
+     * Unlock the task which is abandoned by a tanker
+     * @param taskChosenIndex
+     */
+    public void releaseTask(int taskChosenIndex){
+    	seenTasks.set(taskChosenIndex, new int[]{seenTasks.get(taskChosenIndex)[0],seenTasks.get(taskChosenIndex)[1],seenTasks.get(taskChosenIndex)[2],0});
+    }
+    
+    /**
+     * When the task is accomplished by a tanker, the tanker will inform the command center that the task has been accomplished
+     * Then the command center will remove the accomplished task from the seenTasks.]
+     * @param taskChosenIndex
+     */
+    public void taskAccomplished(int taskChosenIndex){
+    	seenTasks.remove(taskChosenIndex);
     }
 }
