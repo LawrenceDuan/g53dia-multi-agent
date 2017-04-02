@@ -1,3 +1,7 @@
+/**
+ * Developed by Cheng Duan
+ */
+
 package uk.ac.nott.cs.g53dia.multidemo;
 import uk.ac.nott.cs.g53dia.multilibrary.*;
 import java.util.*;
