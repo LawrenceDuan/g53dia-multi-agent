@@ -3,6 +3,7 @@
  */
 
 package uk.ac.nott.cs.g53dia.multidemo;
+import java.text.NumberFormat;
 import java.util.Random;
 import uk.ac.nott.cs.g53dia.multilibrary.*;
 
@@ -13,37 +14,23 @@ public class DemoSimulator {
      * Reducing this value causes the simulation to run faster.
      */
 	private static int DELAY = 100;
-	
-	/** 
-	 * Number of tankers in the fleet
-	 */
-	private static int FLEET_SIZE = 2;
-	
+
 	/**
 	 * Number of timesteps to execute
 	 */
 	private static int DURATION = 10000;
-	
+
 	/**
 	 * Initialise a command centre at the start of the programme
 	 */
 	public static CommandCenter commandCenter = new CommandCenter();
-	/**
-	 * Counts the number of tankers created
-	 */
-	public static int tankerNumberCount = 0;
-	
+
 	public static void main(String[] args) {
         // Create an environment
-        Environment env = new Environment(Tanker.MAX_FUEL/2, new Random(2));
-        //Create a fleet
-        Fleet fleet = new Fleet();
-        // Create the tankers
-        for (int i=0; i<FLEET_SIZE; i++) {
-        	tankerNumberCount++;
-        	fleet.add(new DemoTanker());
-        }
-        // Create a GUI window to show our tanker
+        Environment env = new Environment(Tanker.MAX_FUEL/2, new Random(8));
+		//Create a fleet
+        Fleet fleet = new DemoFleet();
+        // Create a GUI window to show the fleet
         TankerViewer tv = new TankerViewer(fleet);
         tv.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         // Start executing the Tanker
@@ -52,7 +39,7 @@ public class DemoSimulator {
             env.tick();
             // Update the GUI
             tv.tick(env);
-            
+
             for (Tanker t:fleet) {
             	// Get the current view of the tanker
             	Cell[][] view = env.getView(t.getPosition(), Tanker.VIEW_RANGE);
@@ -68,9 +55,21 @@ public class DemoSimulator {
             		System.err.println("Failed: " + afe.getMessage());
             	}
             }
-            System.out.println("===="+env.getTimestep()+"====");
+            System.out.println("===="+env.getTimestep()+"===="+" ("+commandCenter.seenTasks.size()+")");
             try { Thread.sleep(DELAY);} catch (Exception e) { }
         }
+
+		// Calculating the value of the number of stations was approached by the tankers
+		// divides the number of stations was observed by the same tankers
+		String coverPercent;
+		double p1 = commandCenter.walkedStations.size();
+        double p2 = commandCenter.seenStations.size();
+		double p3 = p1 / p2;
+        NumberFormat nf  =  NumberFormat.getPercentInstance();
+        nf.setMinimumFractionDigits(2);
+        coverPercent = nf.format(p3);
+		// int coverPercent = commandCenter.walkedStations.size()/commandCenter.seenStations.size();
+		System.out.println("CoverPercent: "+coverPercent);
     }
-	
+
 }

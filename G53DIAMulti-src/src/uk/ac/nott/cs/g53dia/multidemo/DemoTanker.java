@@ -13,24 +13,27 @@ public class DemoTanker extends Tanker {
 	 * Each tanker has one specific number during each run
 	 */
 	private int tankerCount;
-	
+
 	/**
 	 * Get the command centre
 	 */
 	private CommandCenter commandCenter = DemoSimulator.commandCenter;
 
-    private ArrayList<int[]> initialWlakingAroundPoints = new ArrayList<int[]>();
+//    private ArrayList<int[]> initialWlakingAroundPoints = new ArrayList<int[]>();
+    private ArrayList<Integer> initialWlakingAroundPoints = new ArrayList<Integer>();
     private boolean isInitialWlakingAround = true;
     private boolean needWalkingAroundPoints = true;
     private int initialWalkingAroundMonitor = 0;
+	private int walkingAroundStepsCounter = 0;
+	private boolean meetWalkingAroundRequirement = false;
 
     /**
      * Lists used to store information of wells, stations, tasks and fuelpumps
      */
-    private ArrayList<int[]> seenWells = new ArrayList<int[]>();
-    private ArrayList<int[]> seenStations = new ArrayList<int[]>();
+    private ArrayList<int[]> seenWells = commandCenter.seenWells;
+    private ArrayList<int[]> seenStations = commandCenter.seenStations;
     private ArrayList<int[]> seenTasks = commandCenter.seenTasks;
-    private ArrayList<int[]> seenFuelpumps = new ArrayList<int[]>();
+    private ArrayList<int[]> seenFuelpumps = commandCenter.seenFuelpumps;
 
     /**
      * Track tanker's position
@@ -47,7 +50,7 @@ public class DemoTanker extends Tanker {
         // Add the FuelPump at the root into tanker's memory manually
         seenFuelpumps.add(new int[]{0,0});
         // Get tanker's number when the tanker is created
-        tankerCount = DemoSimulator.tankerNumberCount;
+        tankerCount = DemoFleet.tankerNumberCount;
     }
 
     /**
@@ -82,7 +85,7 @@ public class DemoTanker extends Tanker {
                 int[] focusedPos = new int[]{i+tankPosX-25, -j+tankPosY+25};
 
                 // Storing any detected stations, wells, fuelpumps and tasks
-                if (Math.max(Math.abs(focusedPos[0]), Math.abs(focusedPos[1])) <= 99){
+                // if (Math.max(Math.abs(focusedPos[0]), Math.abs(focusedPos[1])) <= 99){
                     if (view[i][j] instanceof Station) {
                         if (isInList(seenStations, focusedPos) == -1){
                             seenStations.add(focusedPos);
@@ -100,7 +103,7 @@ public class DemoTanker extends Tanker {
                     } else {
                         continue;
                     }
-                }
+                // }
             }
         }
     }
@@ -113,26 +116,72 @@ public class DemoTanker extends Tanker {
      */
     private Action initialWalkingAround(Cell[][] view, long timestep){
     	// When the tanker has finished the set path, stop walking around procedure by set "isInitialWlakingAround" to false
-        if(initialWalkingAroundMonitor >= initialWlakingAroundPoints.size()){
-            isInitialWlakingAround = false;
-            return senseAndAct(view, timestep);
-        }
 
-        int[] targetPos = initialWlakingAroundPoints.get(initialWalkingAroundMonitor);
-        if(targetPos[0] == tankPosX && targetPos[1] == tankPosY){
-            initialWalkingAroundMonitor++;
-            if(getCurrentCell(view) instanceof FuelPump){
-                if(getFuelLevel() == 100) {
-                    return senseAndAct(view, timestep);
-                } else {
-                    return new RefuelAction();
-                }
-            } else {
-                return senseAndAct(view, timestep);
-            }
-        } else {
-            return moveTowardsPointsAction(view, targetPos);
-        }
+//		if(initialWalkingAroundMonitor >= initialWlakingAroundPoints.size()){
+//            isInitialWlakingAround = false;
+//            return senseAndAct(view, timestep);
+//        }
+
+		 if(walkingAroundStepsCounter == 100){
+             	isInitialWlakingAround = false;
+		 		walkingAroundStepsCounter = 0;
+		 		initialWalkingAroundMonitor = 0;
+				meetWalkingAroundRequirement = false;
+		 		return new RefuelAction();
+         }
+
+		 if(meetWalkingAroundRequirement){
+			 if(walkingAroundStepsCounter < 25){
+			 	initialWalkingAroundMonitor = 1;
+			 	walkingAroundStepsCounter++;
+			 	// System.out.println(walkingAroundStepsCounter);
+			 	tankMovement((int)initialWlakingAroundPoints.get(0));
+			 	return new MoveAction((int)initialWlakingAroundPoints.get(0));
+			 } else if (walkingAroundStepsCounter < 75){
+			 	initialWalkingAroundMonitor = 2;
+			 	walkingAroundStepsCounter++;
+			 	// System.out.println(walkingAroundStepsCounter);
+			 	tankMovement((int)initialWlakingAroundPoints.get(1));
+			 	return new MoveAction((int)initialWlakingAroundPoints.get(1));
+			 } else {
+			 	initialWalkingAroundMonitor = 3;
+			 	walkingAroundStepsCounter++;
+			 	tankMovement((int)initialWlakingAroundPoints.get(2));
+			 	return new MoveAction((int)initialWlakingAroundPoints.get(2));
+			 }
+		 }
+
+		 if(getCurrentCell(view) instanceof FuelPump){
+			 if(getFuelLevel() == 100){
+				 meetWalkingAroundRequirement = true;
+				 return senseAndAct(view, timestep);
+			 }else{
+				 return new RefuelAction();
+			 }
+		 }else{
+			 // Find nearest fuelPump going from current tank position
+             int[] nearestFuelpumpGoingFromCurrent = seenFuelpumps.get(commandCenter.getClosestIndexBetween(seenFuelpumps, new int[]{tankPosX, tankPosY}));
+			 return moveTowardsPointsAction(view, nearestFuelpumpGoingFromCurrent);
+		 }
+
+
+
+
+//        int[] targetPos = initialWlakingAroundPoints.get(initialWalkingAroundMonitor);
+//        if(targetPos[0] == tankPosX && targetPos[1] == tankPosY){
+//            initialWalkingAroundMonitor++;
+//            if(getCurrentCell(view) instanceof FuelPump){
+//                if(getFuelLevel() == 100) {
+//                    return senseAndAct(view, timestep);
+//                } else {
+//                    return new RefuelAction();
+//                }
+//            } else {
+//                return senseAndAct(view, timestep);
+//            }
+//        } else {
+//            return moveTowardsPointsAction(view, targetPos);
+//        }
     }
 
     /**
@@ -213,6 +262,7 @@ public class DemoTanker extends Tanker {
                                 Task currentTask = currentCellStation.getTask();
                                 commandCenter.taskAccomplished(taskChosenIndex);
                                 isToTask = false;
+								commandCenter.stationWalked(new int[]{tankPosX, tankPosY});
                                 return new LoadWasteAction(currentTask);
                             }
                         } else {
@@ -252,6 +302,7 @@ public class DemoTanker extends Tanker {
                             Task currentTask = currentCellStation.getTask();
                             int newTask = seenTasks.get(taskChosenIndex)[2] - getWasteCapacity();
                             seenTasks.get(taskChosenIndex)[2] = newTask;
+							commandCenter.stationWalked(new int[]{tankPosX, tankPosY});
                             return new LoadWasteAction(currentTask);
                         } else {
                             return moveTowardsPointsAction(view, taskToGo);
@@ -436,7 +487,9 @@ public class DemoTanker extends Tanker {
 	public Action goToFuelPump(Cell[][] view, long timestep, int[] nearestFuelpumpGoingFromCurrent){
 		if(getCurrentCell(view) instanceof FuelPump){
 			if(getFuelLevel() == 100) {
+				meetWalkingAroundRequirement = true;
 				return walkingAround(view, timestep);
+//				return senseAndAct(view, timestep);
 			} else {
 				return new RefuelAction();
 			}
@@ -462,6 +515,7 @@ public class DemoTanker extends Tanker {
                 Station currentCellStation = (Station) getCurrentCell(view);
                 Task currentTask = currentCellStation.getTask();
                 commandCenter.taskAccomplished(taskChosenIndex);
+				commandCenter.stationWalked(new int[]{tankPosX, tankPosY});
                 return new LoadWasteAction(currentTask);
             }
         } else {
